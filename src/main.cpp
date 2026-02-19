@@ -24,10 +24,10 @@ static constexpr int MAX_BOUNCERS = 20;
 int main() {
     bn::core::init();
 
-    // Sprites and speeds of bouncers
+    // Sprites and x speeds of bouncers
     // Items with the same index correspond to each other
     bn::vector<bn::sprite_ptr, MAX_BOUNCERS> sprites = {};
-    bn::vector<bn::fixed, MAX_BOUNCERS> speeds = {};
+    bn::vector<bn::fixed, MAX_BOUNCERS> x_speeds = {};
 
     while(true) {
         // if A is pressed add a new bouncer
@@ -35,7 +35,7 @@ int main() {
             // Only add if we're below the maximum
             if(sprites.size() < sprites.max_size()) {
                 sprites.push_back(bn::sprite_items::dot.create_sprite());
-                speeds.push_back(BASE_SPEED);
+                x_speeds.push_back(BASE_SPEED);
             }
         }
 
@@ -65,19 +65,19 @@ int main() {
             bn::fixed x = sprite.x();
 
             // Update x position by adding speed
-            x += speeds[i];
+            x += x_speeds[i];
 
             // If we've gone off the screen on the right
             if(x > MAX_X) {
                 // Snap back to screen and reverse direction
                 x = MAX_X;
-                speeds[i] *=-1;
+                x_speeds[i] *=-1;
             }
             // If we've gone off the screen on the left
             if(x < MIN_X) {
                 // Snap back to screen and reverse direction
                 x = MIN_X;
-                speeds[i] *= -1;
+                x_speeds[i] *= -1;
             }
 
             sprite.set_x(x);
