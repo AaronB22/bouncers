@@ -1,4 +1,4 @@
 # Bouncers
-An exercise to learn about functions and classes.
+A Little game that allows usewrs to add a bouncer to the game. Each bouncer will bounce at a randome speed. The red dot with a smiley face tracks the average x cords.
 
-Please find instructions in [instructions.md](instructions.md).
+![til](./game.gif)

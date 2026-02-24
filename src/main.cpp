@@ -8,7 +8,7 @@
 #include <bn_log.h>
 
 #include "bn_sprite_items_dot.h"
-
+#include "bn_sprite_items_avg.h"
 // Set max/min x position to be the edges of the display
 static constexpr int HALF_SCREEN_WIDTH = bn::display::width() / 2;
 static constexpr bn::fixed MIN_X = -HALF_SCREEN_WIDTH;
@@ -31,13 +31,14 @@ public:
     int x_speed= rng.get_int(1,4);
     int y_speed = rng.get_int(1,4);
     
-
+    bn::fixed get_x(){
+        return sprite.x();
+    }
     void update()
     {
        
         bn::fixed x = sprite.x();
         bn::fixed y = sprite.y();
-
         x += x_speed;
         y += y_speed;
 
@@ -68,22 +69,22 @@ public:
     }
 };
 
-bn::fixed average_x(bn::vector<bn::sprite_ptr, MAX_BOUNCERS>& sprites)
+bn::fixed average_x(bn::vector<Bouncer, MAX_BOUNCERS>& bouncers)
 {
     // Add all x positions together
     bn::fixed x_sum = 0;
-    for (bn::sprite_ptr sprite : sprites)
+    for (Bouncer& bouncer : bouncers)
     {
-        x_sum += sprite.x();
+        x_sum += bouncer.get_x();
     }
 
     bn::fixed x_average = x_sum;
 
     // Only divide if we have 1 or more
     // Prevents division by 0
-    if (sprites.size() > 0)
+    if (bouncers.size() > 0)
     {
-        x_average /= sprites.size();
+        x_average /= bouncers.size();
     }
     return x_average;
 }
@@ -102,6 +103,7 @@ void add_bouncer(bn::vector<Bouncer, MAX_BOUNCERS>& bouncers)
 int main()
 {
     bn::core::init();
+    bn::sprite_ptr average = bn::sprite_items::avg.create_sprite();
 
     // Sprites and x speeds of bouncers
     // Items with the same index correspond to each other
@@ -118,7 +120,7 @@ int main()
 
         if (bn::keypad::b_pressed())
         {
-            // BN_LOG("Average x: ", average_x(sprites));
+            BN_LOG("Average x: ", average_x(bouncers));
         }
         for (Bouncer& bouncer : bouncers)
         {
@@ -127,7 +129,7 @@ int main()
             bouncer.update();
 
         }
-
+        average.set_x(average_x(bouncers));
         bn::core::update();
     }
 }
