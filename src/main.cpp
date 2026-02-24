@@ -13,6 +13,9 @@
 static constexpr int HALF_SCREEN_WIDTH = bn::display::width() / 2;
 static constexpr bn::fixed MIN_X = -HALF_SCREEN_WIDTH;
 static constexpr bn::fixed MAX_X = HALF_SCREEN_WIDTH;
+static constexpr bn::fixed MIN_Y = -bn::display::height() / 2;
+static constexpr bn::fixed MAX_Y = bn::display::height() / 2;
+bn::random rng = bn::random();
 
 // Starting speed of a bouncer
 static constexpr bn::fixed BASE_SPEED = 2;
@@ -20,11 +23,49 @@ static constexpr bn::fixed BASE_SPEED = 2;
 // Maximum number of bouncers on screen at once
 static constexpr int MAX_BOUNCERS = 20;
 
-class Bouncer {
-    public:
-        bn::sprite_ptr sprite = bn::sprite_items::dot.create_sprite();
-        bn::fixed x_speed;
+class Bouncer
+{
+public:
 
+    bn::sprite_ptr sprite = bn::sprite_items::dot.create_sprite();
+    int x_speed= rng.get_int(1,4);
+    int y_speed = rng.get_int(1,4);
+    
+
+    void update()
+    {
+       
+        bn::fixed x = sprite.x();
+        bn::fixed y = sprite.y();
+
+        x += x_speed;
+        y += y_speed;
+
+        if (x > MAX_X)
+        {
+            x = MAX_X;
+            x_speed *= -1;
+        }
+        if (x < MIN_X)
+        {
+            x = MIN_X;
+            x_speed *= -1;
+        }
+        if (y > MAX_Y)
+        {
+            y = MAX_Y;
+            y_speed *= -1;
+        }
+        if (y < MIN_Y)
+        {
+            y = MIN_Y;
+            y_speed *= -1;
+        }
+
+        sprite.set_x(x);
+        sprite.set_y(y);
+        rng.update();
+    }
 };
 
 bn::fixed average_x(bn::vector<bn::sprite_ptr, MAX_BOUNCERS>& sprites)
@@ -51,7 +92,9 @@ void add_bouncer(bn::vector<Bouncer, MAX_BOUNCERS>& bouncers)
 {
 
     // Only add if we're below the maximum
-    if(bouncers.size()<bouncers.max_size()){
+    if (bouncers.size() < bouncers.max_size())
+    {
+
         bouncers.push_back(Bouncer());
     }
 }
@@ -63,10 +106,9 @@ int main()
     // Sprites and x speeds of bouncers
     // Items with the same index correspond to each other
 
-    bn::vector<Bouncer, MAX_BOUNCERS> bouncers={};
+    bn::vector<Bouncer, MAX_BOUNCERS> bouncers = {};
 
-
-    while (true)
+        while (true)
     {
         // if A is pressed add a new bouncer
         if (bn::keypad::a_pressed())
@@ -78,34 +120,12 @@ int main()
         {
             // BN_LOG("Average x: ", average_x(sprites));
         }
-
-        // for each bouncer
-        for (int i = 0; i < bouncers.size(); i++)
+        for (Bouncer& bouncer : bouncers)
         {
-            Bouncer& bouncer= bouncers[i];
-            bn::sprite_ptr sprite = bouncer.sprite;
 
-            bn::fixed x = sprite.x();
 
-            // Update x position by adding speed
-            x += bouncer.x_speed;
+            bouncer.update();
 
-            // If we've gone off the screen on the right
-            if (x > MAX_X)
-            {
-                // Snap back to screen and reverse direction
-                x = MAX_X;
-                bouncer.x_speed*= -1;
-            }
-            // If we've gone off the screen on the left
-            if (x < MIN_X)
-            {
-                // Snap back to screen and reverse direction
-                x = MIN_X;
-                bouncer.x_speed *= -1;
-            }
-
-            sprite.set_x(x);
         }
 
         bn::core::update();
